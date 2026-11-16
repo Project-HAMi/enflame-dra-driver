@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "deviceProfile": {
+      "type": "string",
+      "enum": [
+        "gpu",
+        "cpu",
+        "net"
+      ]
+    }
+  }
+}

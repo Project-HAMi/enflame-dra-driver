@@ -1,0 +1,62 @@
+# Example: Shared ResourceClaim Across Pods
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: basic-shared-claim-across-pods
+
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaim
+metadata:
+  namespace: basic-shared-claim-across-pods
+  name: single-gpu
+spec:
+    devices:
+      requests:
+      - name: gpu
+        exactly:
+          deviceClassName: gpu.example.com
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: basic-shared-claim-across-pods
+  name: pod0
+  labels:
+    app: pod
+spec:
+  containers:
+  - name: ctr0
+    image: ubuntu:22.04
+    command: ["bash", "-c"]
+    args: ["export; trap 'exit 0' TERM; sleep 9999 & wait"]
+    resources:
+      claims:
+      - name: shared-gpu
+  resourceClaims:
+  - name: shared-gpu
+    resourceClaimName: single-gpu
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: basic-shared-claim-across-pods
+  name: pod1
+  labels:
+    app: pod
+spec:
+  containers:
+  - name: ctr0
+    image: ubuntu:22.04
+    command: ["bash", "-c"]
+    args: ["export; trap 'exit 0' TERM; sleep 9999 & wait"]
+    resources:
+      claims:
+      - name: shared-gpu
+  resourceClaims:
+  - name: shared-gpu
+    resourceClaimName: single-gpu

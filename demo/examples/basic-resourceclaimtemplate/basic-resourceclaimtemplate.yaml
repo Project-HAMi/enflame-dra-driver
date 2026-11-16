@@ -1,0 +1,63 @@
+# Example: Two Pods, One Container each, One GPU Each
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: basic-resourceclaimtemplate
+
+---
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  namespace: basic-resourceclaimtemplate
+  name: single-gpu
+spec:
+  spec:
+    devices:
+      requests:
+      - name: gpu
+        exactly:
+          deviceClassName: gpu.example.com
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: basic-resourceclaimtemplate
+  name: pod0
+  labels:
+    app: pod
+spec:
+  containers:
+  - name: ctr0
+    image: ubuntu:22.04
+    command: ["bash", "-c"]
+    args: ["export; trap 'exit 0' TERM; sleep 9999 & wait"]
+    resources:
+      claims:
+      - name: gpu
+  resourceClaims:
+  - name: gpu
+    resourceClaimTemplateName: single-gpu
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: basic-resourceclaimtemplate
+  name: pod1
+  labels:
+    app: pod
+spec:
+  containers:
+  - name: ctr0
+    image: ubuntu:22.04
+    command: ["bash", "-c"]
+    args: ["export; trap 'exit 0' TERM; sleep 9999 & wait"]
+    resources:
+      claims:
+      - name: gpu
+  resourceClaims:
+  - name: gpu
+    resourceClaimTemplateName: single-gpu

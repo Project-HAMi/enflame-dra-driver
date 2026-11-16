@@ -1,0 +1,46 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directories:
+      - "/"
+      - "/hack/tools"
+    schedule:
+      interval: "weekly"
+      day: monday
+      time: "08:00"
+      timezone: US/Pacific
+    groups:
+      kubernetes:
+        patterns:
+          - "k8s.io/*"
+          - "sigs.k8s.io/*"
+      all-go-deps:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "k8s.io/*"
+          - "sigs.k8s.io/*"
+
+  - package-ecosystem: "gomod"
+    directory: "/hack/tools/golangci-lint"
+    allow:
+      # golangci-lint claims to be sensitive to dependency updates, so only
+      # update the tool itself.
+      - dependency-name: github.com/golangci/golangci-lint/v2
+    schedule:
+      interval: "weekly"
+      day: monday
+      time: "08:00"
+      timezone: US/Pacific
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: monday
+      time: "08:00"
+      timezone: US/Pacific
+    groups:
+      github-actions:
+        patterns:
+          - "*"
