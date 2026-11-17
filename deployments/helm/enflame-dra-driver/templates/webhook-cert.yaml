@@ -1,0 +1,19 @@
+{{- if .Values.webhook.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "enflame-dra-driver.fullname" . }}-webhook-cert
+  namespace: {{ include "enflame-dra-driver.namespace" . }}
+  labels:
+    {{- include "enflame-dra-driver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: webhook
+spec:
+  dnsNames:
+    {{- $svcName := printf "%s-webhook" (include "enflame-dra-driver.fullname" .) }}
+    {{- $svcNamespace := (include "enflame-dra-driver.namespace" .) }}
+    - {{ $svcName }}.{{ $svcNamespace }}.svc
+  issuerRef:
+    kind: Issuer
+    name: {{ include "enflame-dra-driver.fullname" . }}-webhook-issuer
+  secretName: {{ include "enflame-dra-driver.fullname" . }}-webhook-cert
+{{- end }}

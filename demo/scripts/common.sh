@@ -24,10 +24,10 @@ SCRIPTS_DIR="$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)"
 ROOT_DIR="$(git rev-parse --show-toplevel)"
 
 # The name of the example driver
-: ${DRIVER_NAME:=dra-example-driver}
+: ${DRIVER_NAME:=enflame-dra-driver}
 
 # The registry, image and tag for the example driver
-: ${DRIVER_IMAGE_REGISTRY:="registry.k8s.io/dra-example-driver"}
+: ${DRIVER_IMAGE_REGISTRY:="dynamia-ai-registry.cn-hangzhou.cr.aliyuncs.com/artifacts/dynamia-ai"}
 : ${DRIVER_IMAGE_NAME:="${DRIVER_NAME}"}
 : ${DRIVER_IMAGE_TAG:="$(cat ${ROOT_DIR}/deployments/helm/${DRIVER_NAME}/Chart.yaml | grep appVersion | sed 's/"//g' | sed -n 's/^appVersion: //p')"}
 # Use DRIVER_IMAGE_OS as the canonical variable name.

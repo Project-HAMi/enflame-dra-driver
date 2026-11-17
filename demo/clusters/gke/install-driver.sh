@@ -16,10 +16,10 @@
 
 set -euo pipefail
 
-: "${DRIVER_RELEASE_NAME:=dra-example-driver}"
-: "${DRIVER_NAMESPACE:=dra-example-driver}"
+: "${DRIVER_RELEASE_NAME:=enflame-dra-driver}"
+: "${DRIVER_NAMESPACE:=enflame-dra-driver}"
 : "${DRIVER_VERSION:=0.2.0}"
-: "${DRIVER_CHART_REF:=oci://registry.k8s.io/dra-example-driver/charts/dra-example-driver}"
+: "${DRIVER_CHART_REF:=oci://dynamia-ai-registry.cn-hangzhou.cr.aliyuncs.com/artifacts/dynamia-ai/charts/enflame-dra-driver}"
 
 go tool -modfile "$(git rev-parse --show-toplevel)/hack/tools/go.mod" helm upgrade -i \
   --create-namespace \

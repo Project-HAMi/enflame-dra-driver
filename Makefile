@@ -39,12 +39,16 @@ ifneq ($(PREFIX),)
 cmd-%: COMMAND_BUILD_OPTIONS = -o $(PREFIX)/$(*)
 endif
 cmds: $(CMD_TARGETS)
+# Cross-compiling to linux from macOS disables cgo by default. Production
+# images must build on linux/amd64 with CGO_ENABLED=1 and libefml present.
+CGO_ENABLED ?= $(shell if [ "$(GOOS)" = "linux" ] && [ "$$(uname -s)" = "Linux" ]; then echo 1; else echo 0; fi)
+
 $(CMD_TARGETS): cmd-%:
-	CGO_LDFLAGS_ALLOW='-Wl,--unresolved-symbols=ignore-in-object-files' GOOS=$(GOOS) \
+	CGO_ENABLED=$(CGO_ENABLED) CGO_LDFLAGS_ALLOW='-Wl,--unresolved-symbols=ignore-in-object-files' GOOS=$(GOOS) \
 		go build -ldflags "-s -w -X main.version=$(VERSION)" $(COMMAND_BUILD_OPTIONS) $(MODULE)/cmd/$(*)
 
 build:
-	GOOS=$(GOOS) go build ./...
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) go build ./...
 
 examples: $(EXAMPLE_TARGETS)
 $(EXAMPLE_TARGETS): example-%:

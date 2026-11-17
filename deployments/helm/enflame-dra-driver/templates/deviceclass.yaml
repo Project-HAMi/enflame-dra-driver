@@ -1,0 +1,12 @@
+---
+apiVersion: {{ include "enflame-dra-driver.resourceApiVersion" . }}
+kind: DeviceClass
+metadata:
+  name: {{ include "enflame-dra-driver.driverName" . }}
+spec:
+  selectors:
+  - cel:
+      expression: "device.driver == '{{ include "enflame-dra-driver.driverName" . }}'"
+  {{- with .Values.deviceClass.extendedResourceName }}
+  extendedResourceName: {{ . | quote }}
+  {{- end }}

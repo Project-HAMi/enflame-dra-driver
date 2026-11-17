@@ -26,7 +26,7 @@ import (
 
 	conversion "k8s.io/apimachinery/pkg/conversion"
 	runtime "k8s.io/apimachinery/pkg/runtime"
-	checkpoint "sigs.k8s.io/dra-example-driver/internal/api/checkpoint"
+	checkpoint "github.com/Project-HAMi/enflame-dra-driver/internal/api/checkpoint"
 )
 
 func init() {

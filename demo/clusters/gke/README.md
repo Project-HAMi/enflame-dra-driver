@@ -29,7 +29,7 @@ GKE cluster.
 
 Supported environment variables:
 
-- `GKE_CLUSTER_NAME` (default: `dra-example-driver-cluster`)
+- `GKE_CLUSTER_NAME` (default: `enflame-dra-driver-cluster`)
 - `GKE_LOCATION` (default: `us-central1-c`)
 - `GKE_RELEASE_CHANNEL` (default: `rapid`)
 - `GKE_NUM_NODES` (default: `1`)
@@ -42,10 +42,10 @@ Supported environment variables:
 
 Supported environment variables:
 
-- `DRIVER_RELEASE_NAME` (default: `dra-example-driver`)
-- `DRIVER_NAMESPACE` (default: `dra-example-driver`)
+- `DRIVER_RELEASE_NAME` (default: `enflame-dra-driver`)
+- `DRIVER_NAMESPACE` (default: `enflame-dra-driver`)
 - `DRIVER_VERSION` (default: `0.2.0`)
-- `DRIVER_CHART_REF` (default: `oci://registry.k8s.io/dra-example-driver/charts/dra-example-driver`)
+- `DRIVER_CHART_REF` (default: `oci://dynamia-ai-registry.cn-hangzhou.cr.aliyuncs.com/artifacts/dynamia-ai/charts/enflame-dra-driver`)
 
 The install script enables `resourceQuota.enabled=true` for GKE and sets
 `image.tag` to `DRIVER_VERSION` so chart/image versions remain aligned.

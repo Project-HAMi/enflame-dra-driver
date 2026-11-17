@@ -16,8 +16,8 @@
 
 set -euo pipefail
 
-: "${DRIVER_RELEASE_NAME:=dra-example-driver}"
-: "${DRIVER_NAMESPACE:=dra-example-driver}"
+: "${DRIVER_RELEASE_NAME:=enflame-dra-driver}"
+: "${DRIVER_NAMESPACE:=enflame-dra-driver}"
 
 go tool -modfile "$(git rev-parse --show-toplevel)/hack/tools/go.mod" helm uninstall "${DRIVER_RELEASE_NAME}" --namespace "${DRIVER_NAMESPACE}"
 

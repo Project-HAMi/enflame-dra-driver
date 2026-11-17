@@ -1,4 +1,4 @@
-module sigs.k8s.io/dra-example-driver/tools/golangci-lint
+module github.com/Project-HAMi/enflame-dra-driver/tools/golangci-lint
 
 go 1.26.4
 

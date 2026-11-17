@@ -15,19 +15,16 @@
 # Matches `toolchain` in go.mod
 GO_VERSION ?= 1.26.8
 
-DRIVER_NAME := dra-example-driver
-MODULE := sigs.k8s.io/$(DRIVER_NAME)
+DRIVER_NAME := enflame-dra-driver
+MODULE := github.com/Project-HAMi/$(DRIVER_NAME)
 
 VERSION  ?=
 vVERSION := v$(VERSION:v%=%)
 
-VENDOR := example.com
-APIS := $(CURDIR)/api/$(VENDOR)/resource/gpu/v1alpha1 $(CURDIR)/internal/api/checkpoint $(CURDIR)/internal/api/checkpoint/v1 $(CURDIR)/api/$(VENDOR)/resource/net/v1alpha1
-
-PLURAL_EXCEPTIONS  = DeviceClassParameters:DeviceClassParameters
-PLURAL_EXCEPTIONS += GpuClaimParameters:GpuClaimParameters
+VENDOR := enflame.com
+APIS := $(CURDIR)/internal/api/checkpoint $(CURDIR)/internal/api/checkpoint/v1
 
 ifeq ($(IMAGE_NAME),)
-REGISTRY ?= registry.example.com
+REGISTRY ?= dynamia-ai-registry.cn-hangzhou.cr.aliyuncs.com/artifacts/dynamia-ai
 IMAGE_NAME = $(REGISTRY)/$(DRIVER_NAME)
 endif

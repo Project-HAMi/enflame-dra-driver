@@ -1,4 +1,4 @@
-module sigs.k8s.io/dra-example-driver/hack/tools
+module github.com/Project-HAMi/enflame-dra-driver/hack/tools
 
 go 1.26.0
 

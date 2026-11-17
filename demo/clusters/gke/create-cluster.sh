@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-: "${GKE_CLUSTER_NAME:=dra-example-driver-cluster}"
+: "${GKE_CLUSTER_NAME:=enflame-dra-driver-cluster}"
 : "${GKE_LOCATION:=us-central1-c}"
 : "${GKE_RELEASE_CHANNEL:=rapid}"
 : "${GKE_NUM_NODES:=1}"

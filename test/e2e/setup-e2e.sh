@@ -18,10 +18,10 @@
 set -e
 
 # Use local Helm chart by default, or from OCI registry if HELM_CHART_PATH is set
-# Example: HELM_CHART_PATH="oci://registry.k8s.io/dra-example-driver/charts/dra-example-driver" make setup-e2e
+# Example: HELM_CHART_PATH="oci://registry.k8s.io/enflame-dra-driver/charts/enflame-dra-driver" make setup-e2e
 # The same env var is honored by the e2e tests themselves, which install a
 # per-test driver release at runtime.
-HELM_CHART_PATH="${HELM_CHART_PATH:-deployments/helm/dra-example-driver}"
+HELM_CHART_PATH="${HELM_CHART_PATH:-deployments/helm/enflame-dra-driver}"
 export HELM_CHART_PATH
 
 # Skip building local driver image if using OCI registry chart

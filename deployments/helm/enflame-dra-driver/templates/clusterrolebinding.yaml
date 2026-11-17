@@ -1,0 +1,14 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "enflame-dra-driver.fullname" . }}-role-binding
+  namespace: {{ include "enflame-dra-driver.namespace" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "enflame-dra-driver.serviceAccountName" . }}
+  namespace: {{ include "enflame-dra-driver.namespace" . }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "enflame-dra-driver.fullname" . }}-role
+  apiGroup: rbac.authorization.k8s.io

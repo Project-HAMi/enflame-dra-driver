@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-: "${GKE_CLUSTER_NAME:=dra-example-driver-cluster}"
+: "${GKE_CLUSTER_NAME:=enflame-dra-driver-cluster}"
 : "${GKE_LOCATION:=us-central1-c}"
 
 gcloud container clusters delete "${GKE_CLUSTER_NAME}" \

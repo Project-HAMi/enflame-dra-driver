@@ -6,8 +6,8 @@ steps:
 - name: gcr.io/k8s-staging-test-infra/gcb-docker-gcloud:v20260729-0b834bafc6 # Go 1.26
   entrypoint: make
   env:
-  - DRIVER_IMAGE_REGISTRY=us-central1-docker.pkg.dev/k8s-staging-images/dra-example-driver
+  - DRIVER_IMAGE_REGISTRY=dynamia-ai-registry.cn-hangzhou.cr.aliyuncs.com/artifacts/dynamia-ai
   - PLATFORMS=linux/amd64,linux/arm64,linux/ppc64le
-  - DRIVER_CHART_REGISTRY=us-central1-docker.pkg.dev/k8s-staging-images/dra-example-driver/charts
+  - DRIVER_CHART_REGISTRY=dynamia-ai-registry.cn-hangzhou.cr.aliyuncs.com/artifacts/dynamia-ai/charts
   args:
     - push-release-artifacts

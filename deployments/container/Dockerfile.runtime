@@ -1,0 +1,16 @@
+# Runtime-only image for hosts that already built linux binaries with CGO+libefml.
+# Build binaries first, then:
+#   docker build -f deployments/container/Dockerfile.runtime \
+#     --build-arg BASE_IMAGE=ubuntu:24.04 \
+#     -t enflame-dra-driver:dev .
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE}
+
+LABEL io.k8s.display-name="Enflame GCU Driver for Dynamic Resource Allocation (DRA)"
+LABEL name="Enflame GCU Driver for Dynamic Resource Allocation (DRA)"
+LABEL vendor="enflame.com"
+LABEL summary="Enflame GCU DRA driver for Kubernetes"
+LABEL description="See summary"
+
+COPY enflame-dra-kubeletplugin /usr/bin/enflame-dra-kubeletplugin
+COPY enflame-dra-webhook /usr/bin/enflame-dra-webhook

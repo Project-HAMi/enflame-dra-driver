@@ -23,8 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
-	checkpointapi "sigs.k8s.io/dra-example-driver/internal/api/checkpoint"
-	v1 "sigs.k8s.io/dra-example-driver/internal/api/checkpoint/v1"
+	checkpointapi "github.com/Project-HAMi/enflame-dra-driver/internal/api/checkpoint"
+	v1 "github.com/Project-HAMi/enflame-dra-driver/internal/api/checkpoint/v1"
 )
 
 // Install registers the internal and v1 checkpoint types with the given scheme.

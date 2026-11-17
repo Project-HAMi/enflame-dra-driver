@@ -1,0 +1,19 @@
+{{- if (gt (int .Values.kubeletPlugin.containers.plugin.metricsPort) 0) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "enflame-dra-driver.fullname" . }}-kubeletplugin-metrics
+  namespace: {{ include "enflame-dra-driver.namespace" . }}
+  labels:
+    {{- include "enflame-dra-driver.labels" . | nindent 4 }}
+    app.kubernetes.io/component: kubeletplugin
+spec:
+  selector:
+    {{- include "enflame-dra-driver.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: kubeletplugin
+  ports:
+  - name: metrics
+    protocol: TCP
+    port: {{ .Values.kubeletPlugin.containers.plugin.metricsPort }}
+    targetPort: metrics
+{{- end }}

@@ -1,0 +1,51 @@
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaim
+metadata:
+  namespace: test-dra
+  name: gcu-multi-claim
+spec:
+  devices:
+    requests:
+    - name: gcu
+      exactly:
+        deviceClassName: gcu.enflame.com
+        count: 2
+        selectors:
+        - cel:
+            # Pin by UUID. After minor-keyed naming these are DRA gcu-3/gcu-4
+            # (/dev/gcu3,/dev/gcu4). Avoid cards held by vllm.
+            expression: >-
+              device.attributes["gcu.enflame.com"].uuid in
+              ["TR8C27121203", "TR8C27150800"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: test-dra
+  name: gcu-multi-pod
+spec:
+  restartPolicy: Never
+  containers:
+  - name: gcu-test
+    image: ubuntu:24.04
+    imagePullPolicy: IfNotPresent
+    command:
+    - bash
+    - -c
+    - |
+      set -euo pipefail
+      echo "=== device nodes ==="
+      ls -la /dev/gcu3 /dev/gcu4 /dev/gcuctl
+      ls -la /dev | grep -E 'gcu[0-9]|gcuctl' || true
+      echo "=== env ==="
+      env | grep -E 'GCU_DEVICE|DRA_' | sort || true
+      echo "=== efsmi ==="
+      efsmi -L
+      echo "=== success ==="
+      sleep 3600
+    resources:
+      claims:
+      - name: gcu
+  resourceClaims:
+  - name: gcu
+    resourceClaimName: gcu-multi-claim
