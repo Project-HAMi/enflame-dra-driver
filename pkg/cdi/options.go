@@ -37,7 +37,7 @@ func WithCDIRoot(root string) Option {
 }
 
 // WithHostRoot sets the host filesystem root used when discovering driver
-// dependencies (firmware, efsmi, libefml). Paths written into CDI specs are
+// dependencies (efsmi, libefml). Paths written into CDI specs are
 // still absolute host paths without this prefix.
 func WithHostRoot(root string) Option {
 	return func(m *Manager) {

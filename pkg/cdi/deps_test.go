@@ -34,7 +34,6 @@ func writeFile(t *testing.T, path, contents string) {
 func TestDiscoverBaseEditsFullDeps(t *testing.T) {
 	host := t.TempDir()
 	writeFile(t, filepath.Join(host, "dev", "gcuctl"), "ctl")
-	writeFile(t, filepath.Join(host, "lib", "firmware", "enflame_ucode_bin", "x.bin"), "fw")
 	writeFile(t, filepath.Join(host, "usr", "bin", "efsmi"), "efsmi")
 	writeFile(t, filepath.Join(host, "usr", "lib", "libefml.so"), "lib")
 	writeFile(t, filepath.Join(host, "usr", "lib", "libefml.so.1"), "lib")
@@ -57,24 +56,41 @@ func TestDiscoverBaseEditsFullDeps(t *testing.T) {
 		assert.Equal(t, mount.HostPath, mount.ContainerPath)
 		mountPaths = append(mountPaths, mount.HostPath)
 	}
-	assert.Contains(t, mountPaths, "/lib/firmware/enflame_ucode_bin")
+	assert.NotContains(t, mountPaths, "/lib/firmware/enflame_ucode_bin")
 	assert.Contains(t, mountPaths, "/usr/bin/efsmi")
 	assert.Contains(t, mountPaths, "/usr/lib/libefml.so")
 	assert.Contains(t, mountPaths, "/usr/lib/libefml.so.1")
 	assert.Contains(t, mountPaths, "/usr/lib/libefml.so.1.2.3")
 }
 
-func TestDiscoverBaseEditsOptionalMissing(t *testing.T) {
+func TestDiscoverBaseEditsMissingEfsmi(t *testing.T) {
 	host := t.TempDir()
 	writeFile(t, filepath.Join(host, "dev", "gcuctl"), "ctl")
+	writeFile(t, filepath.Join(host, "usr", "lib", "libefml.so"), "lib")
 
 	m, err := NewManager(WithHostRoot(host), WithCDIRoot(t.TempDir()))
 	require.NoError(t, err)
 
-	edits, err := m.discoverBaseEdits()
+	_, err = m.discoverBaseEdits()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "/usr/bin/efsmi")
+	assert.Contains(t, err.Error(), "looked under host-root")
+}
+
+func TestDiscoverBaseEditsMissingLibefml(t *testing.T) {
+	host := t.TempDir()
+	writeFile(t, filepath.Join(host, "dev", "gcuctl"), "ctl")
+	writeFile(t, filepath.Join(host, "usr", "bin", "efsmi"), "efsmi")
+	// Static archive alone is not enough for runtime CDI mounts.
+	writeFile(t, filepath.Join(host, "usr", "lib", "libefml_static.a"), "lib")
+
+	m, err := NewManager(WithHostRoot(host), WithCDIRoot(t.TempDir()))
 	require.NoError(t, err)
-	require.Len(t, edits.DeviceNodes, 1)
-	assert.Empty(t, edits.Mounts)
+
+	_, err = m.discoverBaseEdits()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "libefml.so")
+	assert.Contains(t, err.Error(), "looked under host-root")
 }
 
 func TestDiscoverBaseEditsMissingGcuctl(t *testing.T) {
@@ -85,6 +101,7 @@ func TestDiscoverBaseEditsMissingGcuctl(t *testing.T) {
 	_, err = m.discoverBaseEdits()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "/dev/gcuctl")
+	assert.Contains(t, err.Error(), "looked under host-root")
 }
 
 func TestDiscoverDeviceEdits(t *testing.T) {

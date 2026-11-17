@@ -95,7 +95,7 @@ type DeviceState struct {
 func NewDeviceState(config *Config) (*DeviceState, error) {
 	driverResources, err := config.profile.EnumerateDevices()
 	if err != nil {
-		return nil, fmt.Errorf("error enumerating all possible devices: %v", err)
+		return nil, fmt.Errorf("error enumerating devices: %w", err)
 	}
 
 	cdi, err := gcucdi.NewManager(
@@ -111,7 +111,7 @@ func NewDeviceState(config *Config) (*DeviceState, error) {
 
 	err = cdi.CreateBaseSpec()
 	if err != nil {
-		return nil, fmt.Errorf("unable to create CDI spec file for common edits: %v", err)
+		return nil, fmt.Errorf("unable to create CDI base spec (host GCU deps must be at /dev/gcuctl, /usr/bin/efsmi, /usr/lib/libefml.so*): %w", err)
 	}
 
 	configScheme := runtime.NewScheme()

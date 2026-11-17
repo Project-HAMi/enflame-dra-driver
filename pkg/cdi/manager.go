@@ -32,7 +32,7 @@ import (
 
 const (
 	// BaseDeviceName is the CDI device name for common GCU container edits
-	// (gcuctl, firmware, efsmi, libefml). Every claim references this device.
+	// (gcuctl, efsmi, libefml; all required). Every claim references this device.
 	BaseDeviceName = "base"
 )
 

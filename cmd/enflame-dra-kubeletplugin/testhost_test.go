@@ -50,6 +50,10 @@ func writeFakeHostDevices(t *testing.T, hostRoot string, numDevices int) {
 	t.Helper()
 	require.NoError(t, os.MkdirAll(filepath.Join(hostRoot, "dev"), 0o750))
 	require.NoError(t, os.WriteFile(filepath.Join(hostRoot, "dev", "gcuctl"), []byte("ctl"), 0o640))
+	require.NoError(t, os.MkdirAll(filepath.Join(hostRoot, "usr", "bin"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(hostRoot, "usr", "bin", "efsmi"), []byte("efsmi"), 0o640))
+	require.NoError(t, os.MkdirAll(filepath.Join(hostRoot, "usr", "lib"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(hostRoot, "usr", "lib", "libefml.so"), []byte("lib"), 0o640))
 	for i := 0; i < numDevices; i++ {
 		path := filepath.Join(hostRoot, "dev", fmt.Sprintf("gcu%d", i))
 		require.NoError(t, os.WriteFile(path, []byte("dev"), 0o640))

@@ -29,7 +29,6 @@ import (
 
 const (
 	gcuctlDeviceName = "gcuctl"
-	firmwareRelPath  = "lib/firmware/enflame_ucode_bin"
 	efsmiRelPath     = "usr/bin/efsmi"
 	libefmlGlob      = "usr/lib/libefml*"
 )
@@ -84,40 +83,45 @@ func deviceNode(hostPath string) *cdispec.DeviceNode {
 	}
 }
 
+// missingHostDep formats a fail-fast error for a required host dependency that
+// was not found under the configured host root. expected is the absolute host
+// path that will appear in CDI; looked is the on-disk path that was checked.
+func missingHostDep(kind, expected, looked string) error {
+	return fmt.Errorf("required %s missing at %s (looked under host-root as %s); install the Enflame driver packages (efsmi/efml) to the standard paths or fix HOST_ROOT", kind, expected, looked)
+}
+
 // discoverBaseEdits builds the common container edits for all GCU claims:
-// /dev/gcuctl plus optional firmware/efsmi/libefml mounts.
+// /dev/gcuctl plus required efsmi/libefml mounts.
+// Firmware (enflame_ucode_bin) stays on the host; containers do not need it.
 func (m *Manager) discoverBaseEdits() (cdispec.ContainerEdits, error) {
 	edits := cdispec.ContainerEdits{}
 
+	gcuctlExpected := hostAbsPath(filepath.Join(m.devRoot, gcuctlDeviceName))
 	gcuctl := m.hostDevPath(gcuctlDeviceName)
 	if !exists(gcuctl) {
-		return edits, fmt.Errorf("required device node missing: %s", hostAbsPath(filepath.Join(m.devRoot, gcuctlDeviceName)))
+		return edits, missingHostDep("device node", gcuctlExpected, gcuctl)
 	}
 	edits.DeviceNodes = append(edits.DeviceNodes, deviceNode(filepath.Join(m.devRoot, gcuctlDeviceName)))
 
-	firmware := hostPath(m.hostRoot, firmwareRelPath)
-	if exists(firmware) {
-		edits.Mounts = append(edits.Mounts, bindMount(firmwareRelPath))
-	} else {
-		klog.Background().Info("optional GCU firmware directory missing; skipping mount", "path", firmware)
-	}
-
+	efsmiExpected := hostAbsPath(efsmiRelPath)
 	efsmi := hostPath(m.hostRoot, efsmiRelPath)
-	if exists(efsmi) {
-		edits.Mounts = append(edits.Mounts, bindMount(efsmiRelPath))
-	} else {
-		klog.Background().Info("optional efsmi binary missing; skipping mount", "path", efsmi)
+	if !exists(efsmi) {
+		return edits, missingHostDep("efsmi binary", efsmiExpected, efsmi)
 	}
+	edits.Mounts = append(edits.Mounts, bindMount(efsmiRelPath))
 
-	libMatches, err := filepath.Glob(hostPath(m.hostRoot, libefmlGlob))
+	libPattern := hostPath(m.hostRoot, libefmlGlob)
+	libMatches, err := filepath.Glob(libPattern)
 	if err != nil {
 		return edits, fmt.Errorf("glob libefml: %w", err)
 	}
 	sort.Strings(libMatches)
-	if len(libMatches) == 0 {
-		klog.Background().Info("optional libefml libraries missing; skipping mounts", "pattern", hostPath(m.hostRoot, libefmlGlob))
-	}
+	shared := 0
 	for _, match := range libMatches {
+		base := filepath.Base(match)
+		if strings.HasPrefix(base, "libefml.so") {
+			shared++
+		}
 		rel, err := filepath.Rel(m.hostRoot, match)
 		if err != nil || strings.HasPrefix(rel, "..") {
 			// Fall back to stripping a leading hostRoot prefix for absolute paths.
@@ -127,6 +131,13 @@ func (m *Manager) discoverBaseEdits() (cdispec.ContainerEdits, error) {
 			}
 		}
 		edits.Mounts = append(edits.Mounts, bindMount(rel))
+	}
+	if shared == 0 {
+		return edits, missingHostDep(
+			"libefml shared library (libefml.so*)",
+			hostAbsPath("usr/lib/libefml.so"),
+			libPattern,
+		)
 	}
 
 	return edits, nil

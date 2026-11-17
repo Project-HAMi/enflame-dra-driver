@@ -26,7 +26,7 @@ Helm chart: `deployments/helm/enflame-dra-driver`.
 
 ## Deploy (sketch)
 
-Plugin DaemonSet mounts the host root at `/host` (`HOST_ROOT=/host`) so CDI discovery can see firmware / `efsmi` / `libefml`, plus `/dev` and host `/usr/lib` for the plugin process. Default driver name is `gcu.enflame.com`; webhook stays off until `GcuConfig` exists.
+Plugin DaemonSet mounts the host root at `/host` (`HOST_ROOT=/host`) so CDI discovery can see `efsmi` / `libefml`, plus `/dev` and host `/usr/lib` for the plugin process. Default driver name is `gcu.enflame.com`; webhook stays off until `GcuConfig` exists.
 
 ```fish
 # on a linux/amd64 GCU node with Go + libefml

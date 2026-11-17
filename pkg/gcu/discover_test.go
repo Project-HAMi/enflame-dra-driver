@@ -84,6 +84,7 @@ func TestDiscoverPropagatesEFMLError(t *testing.T) {
 	_, err := Discover()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "efml boom")
+	assert.Contains(t, err.Error(), "LD_LIBRARY_PATH")
 }
 
 func writeTopology(t *testing.T, hostRoot string, minor int, pciRoot, pciSlot, numa string) {

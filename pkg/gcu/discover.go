@@ -38,7 +38,7 @@ func Discover(opts ...Option) ([]Device, error) {
 
 	infos, err := discoverEFML()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("EFML discovery failed (plugin needs host libefml.so loadable via LD_LIBRARY_PATH, normally /usr/lib mounted at /opt/enflame/lib): %w", err)
 	}
 
 	devices := make([]Device, 0, len(infos))

@@ -38,7 +38,6 @@ func setupHost(t *testing.T) (hostRoot, cdiRoot string) {
 	writeFile(t, filepath.Join(hostRoot, "dev", "gcu0vid0"), "vid")
 	writeFile(t, filepath.Join(hostRoot, "usr", "bin", "efsmi"), "efsmi")
 	writeFile(t, filepath.Join(hostRoot, "usr", "lib", "libefml.so"), "lib")
-	writeFile(t, filepath.Join(hostRoot, "lib", "firmware", "enflame_ucode_bin", "fw.bin"), "fw")
 	return hostRoot, cdiRoot
 }
 
@@ -76,6 +75,10 @@ func TestCreateBaseAndClaimSpecs(t *testing.T) {
 	require.NotNil(t, base.Devices[0].ContainerEdits.DeviceNodes[0])
 	assert.Equal(t, "/dev/gcuctl", base.Devices[0].ContainerEdits.DeviceNodes[0].Path)
 	require.NotEmpty(t, base.Devices[0].ContainerEdits.Mounts)
+	for _, mount := range base.Devices[0].ContainerEdits.Mounts {
+		require.NotNil(t, mount)
+		assert.NotEqual(t, "/lib/firmware/enflame_ucode_bin", mount.ContainerPath)
+	}
 
 	claimUID := "11111111-2222-3333-4444-555555555555"
 	require.NoError(t, m.CreateClaimSpec(claimUID, []Device{{
