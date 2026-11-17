@@ -12,8 +12,7 @@ driver for Enflame GCU devices.
 | Binary | Role |
 | --- | --- |
 | `enflame-dra-kubeletplugin` | Node kubelet DRA plugin |
-| `enflame-dra-webhook` | Optional validating webhook (opaque config; stage 6) |
-| `gcu-cdi-gen` | Offline CDI spec generator for host comparison |
+| `enflame-dra-webhook` | Optional validating webhook (opaque config; deferred) |
 
 ## Build
 

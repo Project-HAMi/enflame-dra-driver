@@ -4,7 +4,6 @@ vendor/
 
 /enflame-dra-kubeletplugin
 /enflame-dra-webhook
-/gcu-cdi-gen
 coverage.out
 third_party/efml/lib/
 

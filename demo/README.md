@@ -1,29 +1,13 @@
 # Demo Examples
 
-The `demo/examples/` directory contains example workloads that demonstrate different ways to request and configure devices using Dynamic Resource Allocation (DRA).
+Workloads that exercise the Enflame GCU DRA driver:
 
-Examples prefixed with `basic-` are a good starting point for
-learning about DRA.
+| Example | What it does |
+| --- | --- |
+| [`gcu-basic`](examples/gcu-basic) | One GCU via ResourceClaim + Pod |
+| [`gcu-multi`](examples/gcu-multi) | Two GCUs in one claim |
 
-Each example directory has a README.md explaining what it demonstrates, what output to expect, and the driver and cluster requirements.
-
-## Running Examples
-
-Each example can be run individually:
-
-```bash
-kubectl apply -f demo/examples/<example-name>/<example-name>.yaml
+```fish
+kubectl apply -f demo/examples/gcu-basic/gcu-basic.yaml
+kubectl -n test-dra delete -f demo/examples/gcu-basic/gcu-basic.yaml
 ```
-
-To clean up:
-
-```bash
-kubectl delete -f demo/examples/<example-name>/<example-name>.yaml
-```
-
-## Notes
-
-- The default Helm chart configures **8 GPUs** per node, which is enough to run
-  several examples simultaneously.
-- Each example creates its own namespace, so examples don't interfere with
-  each other's resource names.
