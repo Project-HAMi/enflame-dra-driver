@@ -51,8 +51,14 @@ const (
 	attrPCIBusID        resourceapi.QualifiedName = "pcieBusID"
 	attrDriverVersion   resourceapi.QualifiedName = "driverVersion"
 	attrFirmwareVersion resourceapi.QualifiedName = "firmwareVersion"
-	capacityMemory      resourceapi.QualifiedName = "memory"
-	brandEnflame                                  = "Enflame"
+	capacityMemory resourceapi.QualifiedName = "memory"
+	capacityCores  resourceapi.QualifiedName = "cores"
+	// wholeCardCores is the HAMi-style 0–100 compute unit for a full GCU.
+	// Today only whole-card allocation is supported: RequestPolicy allows solely
+	// this value as Default, so the scheduler records ConsumedCapacity like the
+	// sharing path, without partial splits yet.
+	wholeCardCores int64 = 100
+	brandEnflame         = "Enflame"
 )
 
 // discoverFunc is overwritten in tests.
@@ -132,13 +138,32 @@ func toResourceDevice(d pkggcu.Device) resourceapi.Device {
 		}
 	}
 
+	coresQty := resource.NewQuantity(wholeCardCores, resource.DecimalSI)
 	dev := resourceapi.Device{
-		Name:       d.Name,
-		Attributes: attrs,
+		Name:                     d.Name,
+		Attributes:               attrs,
+		AllowMultipleAllocations: ptr.To(true),
+		Capacity: map[resourceapi.QualifiedName]resourceapi.DeviceCapacity{
+			// Whole-card-only consumable capacity: Default (and sole ValidValues
+			// entry) is a full card, so ExactCount claims without capacity
+			// requests still get ConsumedCapacity={cores:100, memory:<full>}.
+			capacityCores: {
+				Value: *coresQty,
+				RequestPolicy: &resourceapi.CapacityRequestPolicy{
+					Default:     coresQty,
+					ValidValues: []resource.Quantity{*coresQty},
+				},
+			},
+		},
 	}
 	if d.MemoryBytes > 0 {
-		dev.Capacity = map[resourceapi.QualifiedName]resourceapi.DeviceCapacity{
-			capacityMemory: {Value: *resource.NewQuantity(int64(d.MemoryBytes), resource.BinarySI)},
+		memQty := resource.NewQuantity(int64(d.MemoryBytes), resource.BinarySI)
+		dev.Capacity[capacityMemory] = resourceapi.DeviceCapacity{
+			Value: *memQty,
+			RequestPolicy: &resourceapi.CapacityRequestPolicy{
+				Default:     memQty,
+				ValidValues: []resource.Quantity{*memQty},
+			},
 		}
 	}
 	return dev

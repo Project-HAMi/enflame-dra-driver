@@ -65,7 +65,7 @@ helm upgrade --install enflame-dra-driver deployments/helm/enflame-dra-driver \
 - Stage 0: CDI manager — done
 - Stage 1: scaffold rename / mock profile removal — done
 - Stage 2: EFML device discovery (`pkg/gcu` via libefml cgo; sysfs only for NUMA/PCIe topology) — done
-- Stage 3: ResourceSlice attributes aligned with HAMi nvidia-dra-driver (`type`/`uuid`/`productName`/`brand`/`pcieBusID`/`driverVersion` + standard `pcieRoot`/`numaNode`; GCU extras `serialNumber`/`firmwareVersion`; capacity `memory`) — done
+- Stage 3: ResourceSlice attributes aligned with HAMi nvidia-dra-driver (`type`/`uuid`/`productName`/`brand`/`pcieBusID`/`driverVersion` + standard `pcieRoot`/`numaNode`; GCU extras `serialNumber`/`firmwareVersion`; consumable capacity `cores`/`memory` with whole-card-only Default/ValidValues so ConsumedCapacity is recorded) — done
 - Stage 4: Prepare/Unprepare injects real `/dev/gcuN` via CDI; startup cleans orphaned claim specs — done
 - Stage 5: Device health monitoring via sysfs `device_health`/`device_state`, reported through KEP-4680 `WatchHealthStatus` — done
 - Stage 7: Deployed on enflame (`HOST_ROOT=/host`, local `enflame-dra-driver:dev`, driver `gcu.enflame.com`) — done

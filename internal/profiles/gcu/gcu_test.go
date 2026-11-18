@@ -65,9 +65,30 @@ func TestEnumerateDevicesFromDiscover(t *testing.T) {
 	assert.NotContains(t, d.Attributes, resourceapi.QualifiedName("partNumber"))
 	assert.NotContains(t, d.Attributes, resourceapi.QualifiedName("numaNode"))
 
+	require.NotNil(t, d.AllowMultipleAllocations)
+	assert.True(t, *d.AllowMultipleAllocations)
+
+	require.Contains(t, d.Capacity, capacityCores)
+	coresCap := d.Capacity[capacityCores]
+	coresVal := coresCap.Value
+	assert.Equal(t, int64(100), coresVal.Value())
+	require.NotNil(t, coresCap.RequestPolicy)
+	require.NotNil(t, coresCap.RequestPolicy.Default)
+	assert.Equal(t, int64(100), coresCap.RequestPolicy.Default.Value())
+	require.Len(t, coresCap.RequestPolicy.ValidValues, 1)
+	vv := coresCap.RequestPolicy.ValidValues[0]
+	assert.Equal(t, int64(100), vv.Value())
+
 	require.Contains(t, d.Capacity, capacityMemory)
-	mem := d.Capacity[capacityMemory].Value
-	assert.Equal(t, int64(51506053120), mem.Value())
+	memCap := d.Capacity[capacityMemory]
+	memVal := memCap.Value
+	assert.Equal(t, int64(51506053120), memVal.Value())
+	require.NotNil(t, memCap.RequestPolicy)
+	require.NotNil(t, memCap.RequestPolicy.Default)
+	assert.Equal(t, int64(51506053120), memCap.RequestPolicy.Default.Value())
+	require.Len(t, memCap.RequestPolicy.ValidValues, 1)
+	mv := memCap.RequestPolicy.ValidValues[0]
+	assert.Equal(t, int64(51506053120), mv.Value())
 }
 
 func TestEnumerateDevicesOmitsUnknownNUMA(t *testing.T) {
