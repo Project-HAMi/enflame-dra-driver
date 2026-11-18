@@ -5,7 +5,6 @@ vendor/
 /enflame-dra-kubeletplugin
 /enflame-dra-webhook
 coverage.out
-third_party/efml/lib/
 
 driver_image.tar
 *.tgz
@@ -15,3 +14,7 @@ driver_image.tar
 
 # Ignore .bin files
 .bin/
+
+# Go CI coverage
+cover.out
+coverage.out

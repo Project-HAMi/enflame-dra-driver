@@ -18,6 +18,11 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    rules:
+      # cgo status constants confuse gocritic dupSubExpr on ret != C.EFML_SUCCESS_V2.
+      - path: pkg/gcu/efml/efml\.go
+        linters:
+          - gocritic
     paths:
       - third_party$
       - builtin$

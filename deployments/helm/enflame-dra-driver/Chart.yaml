@@ -12,11 +12,8 @@ description: A Helm chart for the Enflame GCU Dynamic Resource Allocation (DRA) 
 # pipeline. Library charts do not define any templates and therefore cannot be deployed.
 type: application
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-# This should not be manually updated. It will be automatically set based on a
-# Git tag when a release is published.
+# Chart release version. Release workflow publishes only stable X.Y.Z
+# (no pre-release suffix). Bump on main to trigger release-helm-chart.yml.
 version: 0.0.0-dev
 
 # This is the version number of the application being deployed. This version number should be

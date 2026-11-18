@@ -18,9 +18,21 @@ driver for Enflame GCU devices.
 
 ```bash
 make binaries
-make test
-make lint
+make ci          # fmt-check, vet, lint, unit tests (EFML stub), build
+make verify-helm-chart
 ```
+
+Production linux/amd64 images still need `CGO_ENABLED=1` and host `libefml`.
+GitHub Actions CI: `make ci` / `make verify-helm-chart` (see `.github/workflows/`).
+
+### Release
+
+| Trigger | Workflow | Publishes |
+| --- | --- | --- |
+| Push tag `vX.Y.Z` | `release-image.yml` | `ghcr.io/<owner>/enflame-dra-driver:vX.Y.Z` + GitHub Release |
+| Bump `Chart.yaml` `version` on `main` | `release-helm-chart.yml` | `oci://ghcr.io/<owner>/charts/enflame-dra-driver` + Release `enflame-dra-driver-X.Y.Z` |
+
+Image release is **linux/amd64** only and links the vendored `third_party/efml/lib` (committed for cgo / GHCR builds). Chart versions must be stable `X.Y.Z` (no `-dev` suffix).
 
 Helm chart: `deployments/helm/enflame-dra-driver`.
 

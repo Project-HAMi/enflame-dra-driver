@@ -23,8 +23,7 @@ ENV GOPROXY=https://goproxy.cn,direct
 WORKDIR /build
 COPY . .
 
-# libefml is required for cgo. Place shared libs under third_party/efml/lib
-# (see third_party/efml/README.md) before building the image.
+# libefml is required for cgo; libs are vendored under third_party/efml/lib.
 RUN mkdir -p /usr/lib /out/lib && \
     if ls third_party/efml/lib/libefml.so* >/dev/null 2>&1; then \
       cp -a third_party/efml/lib/libefml.so* /usr/lib/ /out/lib/; \

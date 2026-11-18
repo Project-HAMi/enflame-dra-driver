@@ -15,7 +15,17 @@
 MKDIR    ?= mkdir
 TR       ?= tr
 DIST_DIR ?= $(CURDIR)/dist
-HELM     ?= "go tool -modfile $(CURDIR)/hack/tools/go.mod helm"
+HELM     ?= go tool -modfile $(CURDIR)/hack/tools/go.mod helm
+GO       ?= go
+GOLANGCI_LINT ?= go tool -modfile $(CURDIR)/hack/tools/golangci-lint/go.mod golangci-lint
+GOLANGCI_LINT_CONFIG ?= .golangci.yaml
+GO_PACKAGES ?= ./...
+GO_BUILD_PACKAGES ?= ./...
+GO_COVERAGE_FILE ?= cover.out
+CHART_PATH ?= deployments/helm/enflame-dra-driver
+HELM_RELEASE_NAME ?= enflame-dra-driver
+# Chart validation rejects the default namespace unless allowDefaultNamespace=true.
+HELM_TEMPLATE_ARGS ?= --namespace kube-system
 
 export IMAGE_GIT_TAG ?= $(shell git describe --tags --always --dirty --match 'v*')
 export CHART_GIT_TAG ?= $(shell git describe --tags --always --dirty --match 'chart/*')
@@ -26,7 +36,7 @@ CMDS := $(patsubst ./cmd/%/,%,$(sort $(dir $(wildcard ./cmd/*/))))
 CMD_TARGETS := $(patsubst %,cmd-%, $(CMDS))
 
 CHECK_TARGETS := assert-fmt vet lint ineffassign misspell
-MAKE_TARGETS := binaries build check fmt test examples cmds coverage generate $(CHECK_TARGETS)
+MAKE_TARGETS := binaries build check fmt fmt-check test test-ci examples cmds coverage generate ci verify-build verify-helm-chart $(CHECK_TARGETS)
 
 TARGETS := $(MAKE_TARGETS) $(CMD_TARGETS)
 
@@ -41,65 +51,75 @@ endif
 cmds: $(CMD_TARGETS)
 # Cross-compiling to linux from macOS disables cgo by default. Production
 # images must build on linux/amd64 with CGO_ENABLED=1 and libefml present.
+# GitHub Actions / make ci use CGO_ENABLED=0 and the EFML stub.
 CGO_ENABLED ?= $(shell if [ "$(GOOS)" = "linux" ] && [ "$$(uname -s)" = "Linux" ]; then echo 1; else echo 0; fi)
 
 $(CMD_TARGETS): cmd-%:
 	CGO_ENABLED=$(CGO_ENABLED) CGO_LDFLAGS_ALLOW='-Wl,--unresolved-symbols=ignore-in-object-files' GOOS=$(GOOS) \
-		go build -ldflags "-s -w -X main.version=$(VERSION)" $(COMMAND_BUILD_OPTIONS) $(MODULE)/cmd/$(*)
+		$(GO) build -ldflags "-s -w -X main.version=$(VERSION)" $(COMMAND_BUILD_OPTIONS) $(MODULE)/cmd/$(*)
 
 build:
-	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) go build ./...
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) $(GO) build ./...
 
 examples: $(EXAMPLE_TARGETS)
 $(EXAMPLE_TARGETS): example-%:
-	GOOS=$(GOOS) go build ./examples/$(*)
+	GOOS=$(GOOS) $(GO) build ./examples/$(*)
 
 all: check test build binary
 check: $(CHECK_TARGETS)
 
-# Apply go fmt to the codebase
-fmt:
-	go list -f '{{.Dir}}' $(MODULE)/... \
-		| xargs gofmt -s -l -w
+# dynamia-ai Go CI contract: non-mutating checks that do not require host libefml.
+# Race detection needs cgo; CI therefore skips -race and links the EFML stub.
+ci: fmt-check vet lint test-ci verify-build
 
-assert-fmt:
-	go list -f '{{.Dir}}' $(MODULE)/... \
-		| xargs gofmt -s -l > fmt.out
-	@if [ -s fmt.out ]; then \
-		echo "\nERROR: The following files are not formatted:\n"; \
-		cat fmt.out; \
-		rm fmt.out; \
-		exit 1; \
-	else \
-		rm fmt.out; \
-	fi
+fmt:
+	$(GOLANGCI_LINT) fmt --config "$(GOLANGCI_LINT_CONFIG)"
+
+fmt-check:
+	$(GOLANGCI_LINT) fmt --diff --config "$(GOLANGCI_LINT_CONFIG)"
+
+assert-fmt: fmt-check
 
 ineffassign:
 	go tool -modfile hack/tools/go.mod ineffassign $(MODULE)/...
 
-.PHONY: lint
 lint:
-	go tool -modfile hack/tools/golangci-lint/go.mod golangci-lint run --build-tags=e2e ./...
+	$(GOLANGCI_LINT) run --config "$(GOLANGCI_LINT_CONFIG)" $(GO_PACKAGES)
 
 misspell:
 	go tool -modfile hack/tools/go.mod misspell $(MODULE)/...
 
 vet:
-	go vet $(MODULE)/...
+	CGO_ENABLED=0 $(GO) vet $(GO_PACKAGES)
 
 # Ensure that all log calls support contextual logging.
-test: logcheck
 .PHONY: logcheck
 logcheck:
 	go tool -modfile hack/tools/go.mod logcheck -check-contextual -check-deprecations ./...
 
-COVERAGE_FILE := coverage.out
-test: build cmds
-	go test -v -coverprofile=$(COVERAGE_FILE) $(MODULE)/...
+COVERAGE_FILE := $(GO_COVERAGE_FILE)
+test: logcheck
+	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) $(GO) test -v -coverprofile=$(COVERAGE_FILE) $(GO_PACKAGES)
+
+# CI entry used by make ci / Go CI workflow (always stub EFML; no -race).
+test-ci:
+	CGO_ENABLED=0 $(GO) test -covermode=atomic -coverprofile="$(GO_COVERAGE_FILE)" $(GO_PACKAGES)
+	test -s "$(GO_COVERAGE_FILE)"
+
+verify-build:
+	CGO_ENABLED=0 GOOS=$(GOOS) $(GO) build $(GO_BUILD_PACKAGES)
+
+# Helm CI contract: lint + render. Chart does not regenerate README/schema in CI.
+verify-helm-chart:
+	$(HELM) lint "$(CHART_PATH)"
+	$(HELM) template \
+		"$(HELM_RELEASE_NAME)" \
+		"$(CHART_PATH)" \
+		$(HELM_TEMPLATE_ARGS) >/dev/null
 
 coverage: test
 	cat $(COVERAGE_FILE) | grep -v "_mock.go" > $(COVERAGE_FILE).no-mocks
-	go tool cover -func=$(COVERAGE_FILE).no-mocks
+	$(GO) tool cover -func=$(COVERAGE_FILE).no-mocks
 
 generate: generate-deepcopy generate-conversion
 
