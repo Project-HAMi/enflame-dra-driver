@@ -51,8 +51,8 @@ const (
 	attrPCIBusID        resourceapi.QualifiedName = "pcieBusID"
 	attrDriverVersion   resourceapi.QualifiedName = "driverVersion"
 	attrFirmwareVersion resourceapi.QualifiedName = "firmwareVersion"
-	capacityMemory resourceapi.QualifiedName = "memory"
-	capacityCores  resourceapi.QualifiedName = "cores"
+	capacityMemory      resourceapi.QualifiedName = "memory"
+	capacityCores       resourceapi.QualifiedName = "cores"
 	// wholeCardCores is the HAMi-style 0–100 compute unit for a full GCU.
 	// Today only whole-card allocation is supported: RequestPolicy allows solely
 	// this value as Default, so the scheduler records ConsumedCapacity like the
